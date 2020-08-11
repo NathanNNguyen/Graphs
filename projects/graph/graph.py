@@ -93,14 +93,19 @@ class Graph:
 
         This should be done using recursion.
         """
+
         if visited is None:
             visited = []
         if starting_vertex not in visited:
             print(starting_vertex)
+            # mark this vertex as visited
             visited.append(starting_vertex)
 
+            # for each neighbor
             for n in self.get_neighbors(starting_vertex):
+                # if it's not visited
                 if n not in visited:
+                    # recurse on the neighbor
                     self.dft_recursive(n, visited)
 
     def bfs(self, starting_vertex, destination_vertex):
@@ -120,9 +125,7 @@ class Graph:
             # Grab the last vertex from the PATH
             v = path[-1]
 
-            # If that vertex has not been visited...
-            # if v not in visited:
-            # CHECK IF IT'S THE TARGET
+            # if vertex is our target vertex
             if v == destination_vertex:
                 # IF SO, RETURN PATH
                 return path
@@ -158,7 +161,7 @@ class Graph:
 
         return None
 
-    def dfs_recursive(self, starting_vertex, destination_vertex):
+    def dfs_recursive(self, starting_vertex, destination_vertex, path=None, visited=None):
         """
         Return a list containing a path from
         starting_vertex to destination_vertex in
@@ -166,7 +169,31 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+        if path is None:
+            path = [starting_vertex]
+
+        if visited is None:
+            visited = set()
+
+        vertex = path[-1]
+
+        if vertex == destination_vertex:
+            return path
+
+        # check if visited
+        if vertex not in visited:
+            visited.add(vertex)
+            for n in self.get_neighbors(vertex):
+                next_path = list(path)
+                next_path.append(n)
+
+                # if not recurse with a path
+                result = self.dfs_recursive(
+                    vertex, destination_vertex, next_path, visited)
+
+                # if this recursion returns a path
+                if result:
+                    return result
 
 
 if __name__ == '__main__':
