@@ -64,25 +64,14 @@ class Graph:
         Print each vertex in depth-first order
         beginning from starting_vertex.
         """
-        # create an empty stack
         s = Stack()
-
-        # add starting node to stack
         s.push(starting_vertex)
-
-        # create a visited set
         visited = set()
-
-        # while stack is not empty
         while s.size() > 0:
             v = s.pop()
-
-            # if v not visited
             if v not in visited:
                 print(v)
                 visited.add(v)
-
-                # add all v's neighbors to stack
                 for neighbor in self.get_neighbors(v):
                     s.push(neighbor)
 
@@ -95,11 +84,11 @@ class Graph:
         """
 
         if visited is None:
-            visited = []
+            visited = set()
         if starting_vertex not in visited:
             print(starting_vertex)
             # mark this vertex as visited
-            visited.append(starting_vertex)
+            visited.add(starting_vertex)
 
             # for each neighbor
             for n in self.get_neighbors(starting_vertex):
@@ -183,13 +172,13 @@ class Graph:
         # check if visited
         if vertex not in visited:
             visited.add(vertex)
-            for n in self.get_neighbors(vertex):
+            for neighbor in self.get_neighbors(vertex):
                 next_path = list(path)
-                next_path.append(n)
+                next_path.append(neighbor)
 
                 # if not recurse with a path
                 result = self.dfs_recursive(
-                    vertex, destination_vertex, next_path, visited)
+                    neighbor, destination_vertex, next_path, visited)
 
                 # if this recursion returns a path
                 if result:
