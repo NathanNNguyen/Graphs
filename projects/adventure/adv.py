@@ -12,9 +12,9 @@ world = World()
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
-map_file = "maps/test_loop.txt"
+# map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -29,46 +29,60 @@ player = Player(world.starting_room)
 
 traversal_path = []
 cache = {}
+rooms = {}
 
 # Reverse directions
 reverse_directions = [('n', 's'), ('s', 'n'), ('e', 'w'), ('w', 'e')]
 
-# List to track backwards movements through our map
+# Reverse move through the graph
 reverse_path = []
 
-# Initialize dictionaries and store current room and its exits
+# Get the first room id and its exits stored in our cache
 cache[player.current_room.id] = player.current_room.get_exits()
+rooms[player.current_room.id] = player.current_room.get_exits()
 
 # While the length of our cache dictionary is less than the length of total cache in the map
 while len(cache) < len(room_graph) - 1:
-    # If current room is not in our cache, add it to the cache
-    # with its exiting routes
-    if player.current_room.id not in cache:
-        cache[player.current_room.id] = player.current_room.get_exits()
+    while player.current_room.id not in cache:
+        room_id = player.current_room.id
+        exits = player.current_room.get_exits()
+        # Let's save the room_id and its exits to our cache
+        cache[room_id] = exits
+        rooms[room_id] = exits
 
-        # Get the reverse of the last direction we traveled,
-        # remove it from the current room since we're moving that same way
-        # Indicate that we already went this direction before. Next time,
-        # we'll travel the rest of the exits
+        # Removing a direction from a current room indicates that we already
+        # gone that path, no need to repeat later on
         reverse_direction = reverse_path[-1]
-        cache[player.current_room.id].remove(reverse_direction)
-        print(player.current_room.id)
+        # print(cache[room_id])
+        cache[room_id].remove(reverse_direction)
+        # print(cache[room_id])
 
-    # Randomly choose a direction for moving through the room
-    # Append the direction to the path
+    # When we reached a room with no exits, indicating that the current
+    # direction we're moving is a dead end to that room, now we need to traverse
+    # backward. Let's use our reverse path to figure out the way back
+    while len(cache[player.current_room.id]) < 1:
+        reverse_direction = reverse_path.pop()
+        traversal_path.append(reverse_direction)
+        player.travel(reverse_direction)
+
+    # Randomly choose a direction for moving through the room.
+    # Remove it from the current room exits, then append it to the path.
+    # Removing a direction from a current room indicates that we already
+    # gone that path, no need to repeat later on
+    room_id = player.current_room.id
+    direction = cache[room_id].pop()
+    traversal_path.append(direction)
+
     # Keep track of a reverse path so that when the robot hits a dead end,
     # it knows how to back out
-    available_direction = cache[player.current_room.id].pop()
-    traversal_path.append(available_direction)
     for item in reverse_directions:
-        if item[0] == available_direction:
+        if item[0] == direction:
             reverse_path.append(item[1])
-    print(available_direction)
-    # reverse_path.append(inverse_directions[available_direction])
-    print(player.current_room.id)
 
-    # Move the robot to that direction
-    player.travel(available_direction)
+    # Move to that direction
+    player.travel(direction)
+
+# print(rooms)
 
 # TRAVERSAL TEST
 visited_rooms = set()
